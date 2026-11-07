@@ -1,0 +1,3 @@
+customtkinter>=5.2.2
+requests>=2.32
+embit>=0.7.0      # pure-python PSBT signing for the demo wallet
