@@ -88,21 +88,40 @@ VERIPAY/
 
 ```bash
 git clone https://github.com/soumey-art/VERIPAY.git
-```
-
-### 2. Navigate to the Project
-
-```bash
 cd VERIPAY
 ```
 
-### 3. Install Dependencies
+### 2. Create a Virtual Environment
 
 ```bash
+python -m venv .venv
+```
+
+### 3. Activate the Virtual Environment
+
+**Windows (PowerShell):**
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+**Windows (CMD):**
+```cmd
+.venv\Scripts\activate.bat
+```
+
+**Linux / macOS:**
+```bash
+source .venv/bin/activate
+```
+
+### 4. Install Dependencies
+
+```bash
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 4. Run the Application
+### 5. Run the Application
 
 Start the backend:
 
@@ -116,7 +135,15 @@ Start the GUI:
 python Gui/main.py
 ```
 
-*Note: Configure the Bitcoin node and backend connection before running the application. Adjust commands according to your actual setup.*
+### 6. Deactivate the Virtual Environment
+
+When finished, run:
+
+```bash
+deactivate
+```
+
+**Note:** Ensure the Bitcoin node and backend configurations are properly configured before running the application.
 
 ## 🔄 System Workflow
 
