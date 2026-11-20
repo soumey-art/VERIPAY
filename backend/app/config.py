@@ -12,4 +12,4 @@ JWT_SECRET = os.getenv("JWT_SECRET", "dev-only-change-me")
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///veripay.db")
 
 HRP = {"main": "bc", "test": "tb", "signet": "tb", "regtest": "bcrt"}
-CHAIN = {"regtest": "regtest", "signet": "signet"}[NETWORK]
+CHAIN = {"main": "main", "test": "test", "signet": "signet", "regtest": "regtest"}[NETWORK]

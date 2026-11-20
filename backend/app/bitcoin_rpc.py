@@ -49,6 +49,9 @@ class BitcoinRpc:
         )
         return res["psbt"]
 
+    def send_raw(self, tx_hex: str) -> str:
+        return self._call("sendrawtransaction", [tx_hex])
+
     def test_mempool_accept(self, tx_hex: str) -> tuple[bool, str]:
         res = self._call("testmempoolaccept", [[tx_hex]])[0]
         return bool(res["allowed"]), res.get("reject-reason", "")

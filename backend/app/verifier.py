@@ -1,8 +1,8 @@
 """Payment-level verification of a signed PSBT. Pure logic: no database, no HTTP."""
 from dataclasses import dataclass, field
 
-from .crypto.ecdsa_verify import verify_p2wpkh_input
-from .crypto.psbt_policy import address_matches_chain, finalize_p2wpkh, parse_psbt, spk_of, txid_of
+from .crypto.ecdsa import verify_p2wpkh_input
+from .crypto.psbt import address_matches_chain, finalize_p2wpkh, parse_psbt, spk_of, txid_of
 from .bitcoin_rpc import RpcError
 
 
@@ -71,7 +71,7 @@ def verify_signed_psbt(psbt_b64, *, invoice_address, amount_sat, unsigned_txid, 
 
     # 5. Network
     try:
-        chain = rpc.chain()
+        chain = rpc.get_chain()
         net_ok = address_matches_chain(invoice_address, chain)
         r.add("Correct network", net_ok, f"Node is on {chain}" if net_ok else f"Address is not valid for {chain}")
     except RpcError as e:

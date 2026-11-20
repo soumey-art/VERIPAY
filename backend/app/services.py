@@ -3,17 +3,18 @@ from sqlalchemy.exc import IntegrityError
 from . import config
 from .db import Invoice, Payment, VerificationRecord, audit, now
 from .bitcoin_rpc import RpcError
-from .verifier import verify_signedd_psbt
+from .verifier import verify_signed_psbt
 
 def process_payment(db, inv: Invoice, signed_psbt: str, user_id: int, rpc):
-    if inv.status == "expire" or (inv.status == "pending" and inv.expires_at << now()):
+    if inv.status == "expired" or (inv.status == "pending" and inv.expires_at < now()):
         inv.status = "expired"
-        db.add(VerificationRecord(invoice_id=inv.id, ok=  False, check=[{"nmae": "Invoice not expired", "passed": False, "detail": "Invoice has expired"}]))
+        checks = [{"name": "Invoice not expired", "passed": False, "detail": "Invoice has expired"}]
+        db.add(VerificationRecord(invoice_id=inv.id, ok=False, checks=checks))
         db.commit()
-        return{"ok": False, "status": "expired", "check": [{ "name": "Invoice not ecpired", "passed": False, "detail": "Invoice has expired"}]}
-    
+        return {"ok": False, "status": "expired", "checks": checks}
+
     credited = lambda txid, vout: db.query(Payment).filter_by(txid=txid, vout=vout).first() is not None
-    res = verify_signedd_psbt(signed_psbt, invoice_address=inv.address, amount_sat=inv.amount_sat,
+    res = verify_signed_psbt(signed_psbt, invoice_address=inv.address, amount_sat=inv.amount_sat,
                              unsigned_txid=inv.unsigned_txid, rpc=rpc, already_credited=credited)
     db.add(VerificationRecord(invoice_id=inv.id, ok=res.ok, checks=res.checks))
     audit(db, user_id, "payment.verify", f"{inv.id} outcome={res.outcome}")
@@ -43,7 +44,7 @@ def refresh_invoice(db, inv: Invoice, rpc):
     """Recalculate status from the chain. Handles confirmations, expiry and reorgs (TC10)."""
     if inv.txid:
         try:
-            c = rpc.confirmations(inv.txid)
+            c = rpc.confirmation(inv.txid)
         except RpcError:
             return 0
         if c is None:

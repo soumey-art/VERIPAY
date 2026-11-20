@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 
 from . import config
 from .bitcoin_rpc import BitcoinRpc, RpcError
-from .crypto.psbt_policy import address_matches_chain, parse_psbt, summarize, txid_of
+from .crypto.psbt import address_matches_chain, parse_psbt, summarize, txid_of
 from .db import Invoice, Session, User, VerificationRecord, audit, init_db, now
 from .security import check_password, hash_password, make_token, read_token
 from .services import process_payment, refresh_invoice
@@ -101,7 +101,7 @@ def create_invoice(body: NewInvoice, user=Depends(current_user), db=Depends(get_
         raise HTTPException(403, "Only merchants can create invoices")
     try:
         address = rpc.get_new_address()                  # unique address per invoice
-        if not address_matches_chain(address, rpc.chain()):
+        if not address_matches_chain(address, rpc.get_chain()):
             raise HTTPException(502, "Node returned an address for the wrong network")
     except RpcError as e:
         raise HTTPException(502, str(e))
